@@ -1,0 +1,129 @@
+Phenotypic Series  - PS308350
+Downloaded:	Sep 29, 2020
+Copyright (c) 1966-2020 Johns Hopkins University OMIM, data are provided for research purposes only.
+
+
+Epileptic encephalopathy, early infantile - PS308350 - 89 Entries
+Location	Phenotype	Inheritance	Phenotype mapping key	Phenotype MIM number	Gene/Locus	Gene/Locus MIM number
+1p34.2	Epileptic encephalopathy, early infantile, 18	AR	3	615476	SZT2, KIAA0467, EIEE18	615463
+1p34.1	?Epileptic encephalopathy, early infantile, 15	AR	3	615006	ST3GAL3, SIAT6, ST3GALII, MRT12, EIEE15	606494
+1p32.3	Epileptic encephalopathy, early infantile, 75	AR	3	618437	PARS2, EIEE75	612036
+1p31.3	Epileptic encephalopathy, early infantile, 23	AR	3	615859	DOCK7, KIAA1771, EIEE23	615730
+1p13.3	Epileptic encephalopathy, early infantile, 32	AD	3	616366	KCNA2, EIEE32	176262
+1q25.3	Epileptic encephalopathy, early infantile, 69	AD	3	618285	CACNA1E, CACNL1A6, EIEE69	601013
+1q31.3	?Epileptic encephalopathy, early infantile, 57	AD	3	617771	KCNT2, SLICK, EIEE57	610044
+1q42.2	Epileptic encephalopathy, early infantile, 38	AR	3	617020	ARV1, EIEE38	611647
+1q44	Epileptic encephalopathy, early infantile, 54	AD	3	617391	HNRNPU, HNRPU, SAFA, EIEE54	602869
+2p23.3	Epileptic encephalopathy, early infantile, 50	AR	3	616457	CAD, CDG1Z, EIEE50	114010
+2p15	?Epileptic encephalopathy, early infantile, 88		3	618959	MDH1, EIEE88	154200
+2p15	Epileptic encephalopathy, early infantile, 83	AR	3	618744	UGP2, UGPP2, EIEE83	191760
+2q24.3	Epileptic encephalopathy, early infantile, 62	AD	3	617938	SCN3A, FFEVF4, EIEE62	182391
+2q24.3	Epileptic encephalopathy, early infantile, 11	AD	3	613721	SCN2A, SCN2A1, BFIC3, EIEE11, BFIS3, BFNIS, EA9	182390
+2q24.3	Epileptic encephalopathy, early infantile, 6 (Dravet syndrome)	AD	3	607208	SCN1A, GEFSP2, SMEI, FEB3A, EIEE6, FHM3	182389
+2q31.1	Epileptic encephalopathy, early infantile, 39	AR	3	612949	SLC25A12, ARALAR, EIEE39	603667
+2q32.2	Epileptic encephalopathy, early infantile, 71	AR	3	618328	GLS, GLS1, EIEE71, CASGID, GDPAG	138280
+3p22.1	Epileptic encephalopathy, early infantile, 68	AR	3	618201	TRAK1, OIP106, KIAA1042, EIEE68	608112
+3p21.31	?Epileptic encephalopathy, early infantile, 86	AR	3	618910	DALRD3, EIEE86	618904
+3q22.1	Epileptic encephalopathy, early infantile, 44	AR	3	617132	UBA5, UBE1DC1, EIEE44, SCAR24	610552
+3q25.1	Epileptic encephalopathy, early infantile, 73	AD	3	618379	RNF13, EIEE73	609247
+3q28-q29	Epileptic encephalopathy, early infantile, 47	AD	3	617166	FGF12, FHF1, EIEE47	601513
+4p16.3	Epileptic encephalopathy, early infantile, 63	AR	3	617976	CPLX1, CPX1, EIEE63	605032
+4p14	Epileptic encephalopathy, early infantile, 84	AR	3	618792	UGDH, UDPGDH, EIEE84	603370
+4p12	?Epileptic encephalopathy, early infantile, 40	AR	3	617065	GUF1, EF4, EIEE40	617064
+4p12	Epileptic encephalopathy, early infantile, 78	AD	3	618557	GABRA2, EIEE78	137140
+4p12	Epileptic encephalopathy, early infantile, 45	AD	3	617153	GABRB1, EIEE45	137190
+5p12	Epileptic encephalopathy, early infantile, 24	AD	3	615871	HCN1, BCNG1, EIEE24, GEFSP10	602780
+5q33.3	Epileptic encephalopathy, early infantile, 65	AD	3	618008	CYFIP2, EIEE65	606323
+5q34	Epileptic encephalopathy, early infantile, 19	AD	3	615744	GABRA1, EJM5, ECA4, EIEE19	137160
+5q34	Epileptic encephalopathy, early infantile, 74	AD	3	618396	GABRG2, EIEE74, FEB8, ECA2, GEFSP3	137164
+6p24.1	Epileptic encephalopathy, early infantile, 70	AD	3	618298	PHACTR1, KIAA1733, EIEE70	608723
+6p21.1	Epileptic encephalopathy, early infantile, 60	AR	3	617929	CNPY3, TNRC5, PRAT4A, ERDA5, EIEE60	610774
+6q21	Epileptic encephalopathy, early infantile, 87	AD	3	618916	CDK19, KIAA1028, EIEE87	614720
+7q11.23	Epileptic encephalopathy, early infantile, 51	AR	3	617339	MDH2, EIEE51	154100
+7q11.23	Epileptic encephalopathy, early infantile, 56	AD	3	617665	YWHAG, EIEE56	605356
+7q21.12	?Epileptic encephalopathy, early infantile, 61	AR	3	617933	ADAM22, EIEE61	603709
+7q22.1	Epileptic encephalopathy, early infantile, 76	AR	3	618468	ACTL6B, BAF53B, IDDSSAD, EIEE76	612458
+8p21.3	Epileptic encephalopathy, early infantile, 64	AD	3	618004	RHOBTB2, DBC2, KIAA0717, EIEE64	607352
+9q21.33	Epileptic encephalopathy, early infantile, 58	AD	3	617830	NTRK2, TRKB, OBHD, EIEE58	600456
+9q22.33	Epileptic encephalopathy, early infantile, 59	AD	3	617904	GABBR2, GPR51, EIEE59, NDPLHS	607340
+9q31.3	Epileptic encephalopathy, early infantile, 37	AR	3	616981	FRRS1L, C9orf4, CG6, EIEE37	604574
+9q34.11	Epileptic encephalopathy, early infantile, 4	AD	3	612164	STXBP1, UNC18, EIEE4	602926
+9q34.11	Epileptic encephalopathy, early infantile, 31	AD	3	616346	DNM1, EIEE31	602377
+9q34.11	Epileptic encephalopathy, early infantile, 5	AD	3	613477	SPTAN1, NEAS, EIEE5	182810
+9q34.3	Epileptic encephalopathy, early infantile, 14	AD	3	614959	KCNT1, KIAA1422, EIEE14, ENFL5	608167
+11p15.5	Epileptic encephalopathy, early infantile, 3	AR	3	609304	SLC25A22, GC1, EIEE3	609302
+11p15.4	Epileptic encephalopathy, early infantile, 49	AR	3	617281	DENND5A, RAB6IP1, KIAA1091, EIEE49	617278
+11p13	Epileptic encephalopathy, early infantile, 41	AD	3	617105	SLC1A2, EAAT2, EIEE41	600300
+12p13.31	Epileptic encephalopathy, early infantile, 21	AR	3	615833	NECAP1, EIEE21	611623
+12p13.1	Epileptic encephalopathy, early infantile, 27	AD	3	616139	GRIN2B, NMDAR2B, MRD6, EIEE27	138252
+12q13.13	Epileptic encephalopathy, early infantile, 13	AD	3	614558	SCN8A, CIAT, EIEE13, BFIS5, MYOCL2	600702
+12q24.11-q24.12	Epileptic encephalopathy, early infantile, 67	AD	3	618141	CUX2, CDP2, CUTL2, EIEE67	610648
+14q32.33	Epileptic encephalopathy, early infantile, 66	AD	3	618067	PACS2, KIAA0602, EIEE66	610423
+15q12	Epileptic encephalopathy, early infantile, 43	AD	3	617113	GABRB3, ECA5, EIEE43	137192
+15q12	Epileptic encephalopathy, early infantile, 79	AD	3	618559	GABRA5, EIEE79	137142
+15q21.2	Epileptic encephalopathy, early infantile, 81	AR	3	618663	DMXL2, RC3, KIAA0856, PEPNS, DFNA71, EIEE81	612186
+15q21.3	Epileptic encephalopathy, early infantile, 80	AR	3	618580	PIGB, EIEE80	604122
+15q25.2	Epileptic encephalopathy, early infantile, 48	AR	3	617276	AP3B2, NAPTB, EIEE48	602166
+16p13.3	Epileptic encephalopathy, early infantile, 77	AR	3	618548	PIGQ, EIEE77	605754
+16p13.3	Epileptic encephalopathy, early infantile, 16	AR	3	615338	TBC1D24, KIAA1171, FIME, EIEE16, DOORS, DFNB86, DFNA65, EPRPDC	613577
+16q13	Epileptic encephalopathy, early infantile, 17	AD	3	615473	GNAO1, EIEE17, NEDIM	139311
+16q21	Epileptic encephalopathy, early infantile, 82	AR	3	618721	GOT2	138150
+16q22.1	Epileptic encephalopathy, early infantile, 29	AR	3	616339	AARS1, AARS, CMT2N, EIEE29	601065
+16q23.1-q23.2	Epileptic encephalopathy, early infantile, 28	AR	3	616211	WWOX, FOR, SCAR12, EIEE28	605131
+17p13.1	Epileptic encephalopathy, early infantile, 25	AR	3	615905	SLC13A5, NACT, EIEE25	608305
+17q12	Epileptic encephalopathy, early infantile, 72	AD	3	618374	NEUROD2, EIEE72	601725
+19p13.13	Epileptic encephalopathy, early infantile, 42	AD	3	617106	CACNA1A, CACNL1A4, SCA6, EIEE42	601011
+19q13.11	Epileptic encephalopathy, early infantile, 52	AR	3	617350	SCN1B, GEFSP1, BRGDA5, ATFB13, EIEE52	600235
+19q13.33	Epileptic encephalopathy, early infantile, 46	AD	3	617162	GRIN2D, NMDAR2D, EIEE46	602717
+19q13.33	Microcephaly, seizures, and developmental delay	AR	3	613402	PNKP, PNK, MCSZ, EIEE10, AOA4, CMT2B2	605610
+20p13	Epileptic encephalopathy, early infantile, 35	AR	3	616647	ITPA, EIEE35	147520
+20p12.3	Epileptic encephalopathy, early infantile, 12	AR	3	613722	PLCB1, KIAA0581, PLCB1A, PLCB1B, EIEE12	607120
+20q13.12	Epileptic encephalopathy, early infantile, 34	AR	3	616645	SLC12A5, KCC2, KIAA1176, EIEE34, EIG14	606726
+20q13.13	Epileptic encephalopathy, early infantile, 26	AD	3	616056	KCNB1, EIEE26	600397
+20q13.33	Epileptic encephalopathy, early infantile, 7	AD	3	613720	KCNQ2, EBN1, EIEE7, BFNS1	602235
+20q13.33	Epileptic encephalopathy, early infantile, 33	AD	3	616409	EEF1A2, EIEE33, MRD38	602959
+21q22.11	Epileptic encephalopathy, early infantile, 53	AR	3	617389	SYNJ1, PARK20, EIEE53	604297
+21q22.13	Epileptic encephalopathy, early infantile, 55	AR	3	617599	PIGP, DSCR5, EIEE55	605938
+21q22.3	Epileptic encephalopathy, early infantile, 30	AD	3	616341	SIK1, SNF1LK, MSK, EIEE30	605705
+Xp22.2	Multiple congenital anomalies-hypotonia-seizures syndrome 2	XLR	3	300868	PIGA, PNH1, MCAHS2	311770
+Xp22.13	Epileptic encephalopathy, early infantile, 2	XLD	3	300672	CDKL5, STK9, ISSX, EIEE2	300203
+Xp21.3	Epileptic encephalopathy, early infantile, 1	XLR	3	308350	ARX, ISSX, PRTS, MRXS1, MRX36, MRX54, MRX43, MRX87, MRX29, MRX32	300382
+Xp11.23	Congenital disorder of glycosylation, type IIm	SMo, XLD	3	300896	SLC35A2, UGALT, UGTL, UGT2, CDGX, CDG2M	314375
+Xp11.22	Epileptic encephalopathy, early infantile, 85, with or without midline brain defects		3	301044	SMC1A, SMC1L1, SMC1, DXS423E, KIAA0178, CDLS2, EIEE85	300040
+Xq11.1	Epileptic encephalopathy, early infantile, 8	XLR	3	300607	ARHGEF9, PEM2, KIAA0424, EIEE8	300429
+Xq22.1	Epileptic encephalopathy, early infantile, 9	XL	3	300088	PCDH19, KIAA1313, EFMR, EIEE9	300460
+Xq23	?Congenital disorder of glycosylation, type Is	XLD	3	300884	ALG13, GLT28D1, CDG1S, EIEE36	300776
+Xq23	Epileptic encephalopathy, early infantile, 36	XLD	3	300884	ALG13, GLT28D1, CDG1S, EIEE36	300776
+
+
+
+
+Phenotype Mapping Key
+1 - The disorder is placed on the map due to its association with a gene, but the underlying defect is not known.
+2 - The disorder was placed on the map by statistical methods.
+3 - The molecular basis of the disorder is known.
+4 - A contiguous gene duplication or deletion syndrome in which multiple genes are involved.
+
+
+Inheritance Abbreviations
+?AD	?Autosomal dominant
+?XLR	?X-linked recessive
+AD	Autosomal dominant
+AR	Autosomal recessive
+PD	Pseudoautosomal dominant
+PR	Pseudoautosomal recessive
+DD	Digenic dominant
+DR	Digenic recessive
+ICB	Inherited chromosomal imbalance
+IC	Isolated cases
+Mi	Mitochondrial
+Mu	Multifactorial
+SMo	Somatic mosaicism
+SMu	Somatic mutation
+XL	X-linked
+XLD	X-linked dominant
+XLR	X-linked recessive
+YL	Y-linked
+
+
+

@@ -1,0 +1,325 @@
+---
+title: "PheRS_Disease_Selection"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    lightbox: true
+    gallery: true
+    toc_depth: 3
+    use_bookdown: true
+    fig_caption: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+# load libraries
+library(knitr)
+library(rmdformats)
+
+# define functions
+  myDT = function(data){
+  data %>% DT::datatable(rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+      options = list(
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel'))
+    )
+}
+
+## Global options
+#options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=TRUE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 10)
+opts_knit$set(width=75)
+```
+
+```{r}
+# load libraries
+suppressMessages(library(tidyverse))
+suppressMessages(library(readxl))
+library(purrr)
+library(data.table)
+```
+
+# Set General Variables
+```{r}
+INPUTDIR="/home/stef/Dropbox/WORK/UCL/ihi/projects/phenotype_risk_score/data/input/"
+OUTPUTDIR="/home/stef/Dropbox/WORK/UCL/ihi/projects/phenotype_risk_score/data/output/"
+DATE=Sys.Date()
+SCRIPT="S01"
+```
+
+
+# Load adjudication table
+
+Disease adjudication to map Genomic England recruited specific disease with OMIM diseases or
+OMIM Phenotypic series. Performed by T. Lumbers or D. Cannie 
+
+
+## Adjudication key
+```{r}
+adju_key = data.frame(key= 1:6,
+                      meaning=c("looks correct - record in Final Mappings",
+                      	"needs checking / not sure",
+                        "exclude GeL disease - too broad",
+                        "couldn't find any matching Phenotype Series or OMIM IDs",
+                        "exclude PhenotypeSeries/OMIM IDs are too broad compared to the GeL disease",
+                        "incorrect match"))
+```
+
+```{r}
+adju_key %>% myDT()
+```
+
+## Load adjudication table (hosted on google sheets)
+```{r}
+adju = readxl::read_xlsx(paste0(INPUTDIR,"adjudication_PheRS.2021_01_19.xlsx"), sheet= 2) %>% 
+  select("Normalised Specific Disease", "Phenotypic Series number", 
+  "Phenotypic Series Title", "OMIM IDs (combined)", "Check_RTL", 
+  "Comments_RTL", "Check_DC", "Comments_DC") %>% 
+    filter(!is.na(`Normalised Specific Disease`)) 
+```
+
+### Overview
+```{r}
+adju %>% 
+  count(Check_RTL, Check_DC)
+```
+
+There are `r nrow(adju1[adju1$Check_RTL==1 & adju1$Check_DC==1,])` Diseases which are adjudicated to be
+good fits by both clinicans.
+
+## Filter for diseases with at least one calassification of Key == 1
+```{r}
+disease_keep = adju %>% 
+  filter(Check_RTL == 1 | Check_DC ==1 ) 
+```
+
+```{r}
+disease_keep %>% myDT()
+```
+
+# Clean up data 
+```{r}
+disease_keep_clean = disease_keep %>% 
+  mutate(OMIM_ID = str_extract_all(`OMIM IDs (combined)`, "[0-9]{6}"))
+```
+
+## add OMIM IDs to single  morbiddata
+
+### load OMIM morbiddata
+Morbiddata download on the February, 13th of 2019   
+requested newest downloads but not answer yet from OMIM
+```{r}
+morbidmap = read.delim(paste0(INPUTDIR,"OMIM.morbidmap.2019_11_22.txt"), comment.char = "#") 
+
+# extracting OMIM ID from phenotype column
+# there are actually 2 entries with more than one OMIM ID in the column - currently only first ID is taken forward
+morbidmap_with_pheno_OMIM = morbidmap %>% 
+  mutate(pheno_OMIM = str_extract(Phenotype,"[0-9]{6}") %>% as.integer) %>% 
+  filter(!is.na(pheno_OMIM))
+```
+
+### bring together
+```{r}
+disease_keep_noPS = disease_keep %>% 
+  filter(is.na(`Phenotypic Series number`) | str_count(`Phenotypic Series number`)>8) %>% 
+  mutate(OMIM_ID = str_extract_all(`OMIM IDs (combined)`, "[0-9]{6}"))
+
+# loop over diseases and their mapped OMIM IDs
+omim_mapppings_LIST = list()
+
+for ( i in 1:nrow(disease_keep_noPS)){
+  current = disease_keep_noPS %>% 
+    slice(i)
+  
+  for (j in 1:length(current$OMIM_ID[[1]])){
+    tmp = current %>% 
+      mutate(single_OMIM = current$OMIM_ID[[1]][j] %>% as.integer()) %>% 
+      left_join(morbidmap_with_pheno_OMIM, by =c("single_OMIM" = "pheno_OMIM"))
+    if(j ==1){
+      omim_mapppings_LIST[[i]] = tmp  
+    } else {
+      omim_mapppings_LIST[[i]] = rbind(omim_mapppings_LIST[[i]],tmp)
+    }
+    
+  }
+}
+
+omim_mappings = map_dfr(omim_mapppings_LIST, rbind)
+```
+
+### add clean form of gene symbols
+```{r}
+# load mim2gene.txt, download on the February, 13th of 2019 
+mim2gene = fread(paste0(INPUTDIR,"OMIM.mim2gene.2021_01_19.txt")) %>% 
+  select("MIM.Number"=1,"type" =2,3,4) %>% 
+  filter(grepl("gene", type)) %>%
+  select(1,3,4)
+  
+omim_mappings_with_gene =
+  omim_mappings %>% 
+  left_join(mim2gene, by ="MIM.Number")
+```
+
+### how much missing information is there?
+#### Missing mappings from OMIM pheno ID to OMIM gene ID
+```{r}
+omim_mappings_with_gene %>% count(is.na(MIM.Number))
+```
+
+#### Missing mappings from OMIM pheno ID to Approved Gene ID
+```{r}
+omim_mappings_with_gene %>% count(is.na(`Approved Gene Symbol (HGNC)`))
+```
+
+
+## add OMIM Ids to all phenotype series
+Did not receive API access from OMIM and had to manually download Phenotypic Series data from OMIM
+
+### Load Phenotypic Series data
+```{r}
+PSpath=paste0(INPUTDIR,"OMIM_phenotypic_series/")
+PSfiles = list.files(PSpath, pattern= "^OMIM")
+
+PSlist = list()
+for(i in 1:length(PSfiles)){
+  
+  print(i)
+  PhenotypeSeries = PSfiles[i] %>% 
+    str_replace(pattern = "OMIM-Phenotypic-Series-", replacement = "") %>% 
+    str_extract("[PS0-9]+")
+  
+  PSlist[[i]] = fread(paste0(PSpath,PSfiles[i]), skip = 6, sep = "\t") %>% 
+    mutate(PhenotypeSeries = PhenotypeSeries)
+    
+  names(PSlist)[i] = PhenotypeSeries
+   
+}
+
+PSdf = map_dfr(PSlist, rbind)
+```
+
+```{r}
+disease_keep_withPS = disease_keep %>% 
+  filter(!is.na(`Phenotypic Series number`) &  str_count(`Phenotypic Series number`)==8) %>% 
+  left_join(PSdf, by = c(`Phenotypic Series number` ="PhenotypeSeries")) %>% 
+  left_join(mim2gene, by =c (`Gene/Locus MIM number` = "MIM.Number"))
+```
+
+### how much missing information is there?
+#### Missing mappings from OMIM pheno ID to OMIM gene ID
+```{r}
+disease_keep_withPS %>% count(is.na(`Gene/Locus MIM number`))
+```
+
+
+#### Missing mappings from OMIM pheno ID to Approved Gene ID
+```{r}
+disease_keep_withPS %>% count(is.na(`Approved Gene Symbol (HGNC)`))
+```
+
+## bind both datasets
+```{r}
+data_withPS =disease_keep_withPS %>% 
+  select("NormalisedSpecificDisease" =1,
+         "PhenotypicSeriesNumber" =2,
+         "PhenotypicSeriesName" =3,
+         Phenotype,
+         "PhenotypeMIM" = `Phenotype MIM number`,
+         GeneSymbol = `Approved Gene Symbol (HGNC)`,
+         "GeneMIM" = `Gene/Locus MIM number`,
+         Check_RTL,
+         Comments_RTL,
+         Check_DC,
+         Comments_DC)
+
+data_noPS= omim_mappings_with_gene %>% 
+  select("NormalisedSpecificDisease" =1,
+         "PhenotypicSeriesNumber" =2,
+         "PhenotypicSeriesName" =3,
+          Phenotype,
+         "PhenotypeMIM" = `single_OMIM`,
+         GeneSymbol = `Approved Gene Symbol (HGNC)`,
+         "GeneMIM" = MIM.Number,
+         Check_RTL,
+         Comments_RTL,
+         Check_DC,
+         Comments_DC)
+
+disease_mapping = data_withPS %>% 
+  rbind(data_noPS) %>% 
+  distinct()
+```
+
+## Save
+```{r}
+write_csv(disease_mapping, 
+          paste0(OUTPUTDIR,SCRIPT,".supp.disease_mapping.",DATE,".csv"))
+```
+
+
+# Overview
+##  Number of mapped OMIM IDs for diseases mapped to gene WITHOUT phenotypic series
+```{r}
+disease_mapping %>% 
+  filter(is.na(PhenotypicSeriesNumber)) %>% 
+  filter(!is.na(GeneSymbol)) %>% 
+  count(NormalisedSpecificDisease) %>% 
+  arrange(-n) %>% 
+  myDT
+```
+
+
+##  Number of mapped OMIM IDs for diseases mapped to gene WITH phenotypic series
+```{r}
+disease_mapping %>% 
+  filter(!is.na(PhenotypicSeriesNumber)) %>% 
+  filter(!is.na(GeneSymbol)) %>% 
+  count(NormalisedSpecificDisease) %>% 
+  arrange(-n) %>% 
+  myDT
+```
+
+# Make gene list for variant extraction
+```{r}
+disease_mapping %>%
+  filter(!is.na(GeneSymbol) & GeneSymbol!="") %>% 
+  count(GeneSymbol) %>% 
+  select(GeneSymbol) %>% 
+  write_csv(paste0(OUTPUTDIR,SCRIPT,".supp.PheRS_genes_for_variant_extraction.",DATE,".csv"))
+```
+
+## add stable Gene ID and hg38 coding position
+went to biomart and hg38 on ensembl and used hugo gene symbols filter - uploaded file above - and choose stable gene id version, gene start, gene end and chromosome name as attributes. Then downloaded results. 
+
+# make mapping list for PheRS calculations
+```{r}
+out = disease_mapping %>% 
+  select(NormalisedSpecificDisease,
+         PhenotypeMIM) %>% 
+  distinct() %>% 
+  filter(!is.na(PhenotypeMIM)) %>% 
+  group_by(NormalisedSpecificDisease) %>% 
+  summarise(OMIM = paste(PhenotypeMIM,collapse = ","))
+```
+
+## save
+```{r}
+write_csv(out, paste0(OUTPUTDIR,SCRIPT,".supp.normlised_disease_omim_mapping.",DATE,".csv"))
+```
+
