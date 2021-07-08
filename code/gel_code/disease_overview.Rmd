@@ -1,0 +1,260 @@
+---
+title: "disease_overview"
+author: "Stefanie Mueller"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    lightbox: true
+    gallery: true
+    toc_depth: 3
+    use_bookdown: true
+    fig_caption: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+# load libraries
+library(knitr)
+library(rmdformats)
+
+# define functions
+myDT = function(data){
+  data %>% DT::datatable(rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+      options = list(
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel'))
+    )
+}
+
+## Global options
+#options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=TRUE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 10)
+opts_knit$set(width=75)
+```
+
+# PREFACE
+**PROJECT**:  Phenotype Risk Scores  
+**OBJECTIVE**:  Summary stats over analysed diseases   
+**DEPENDENCE**:  phers.R    
+**REQUIREMENT**:  R 3.5.0   
+<br>
+
+## Load packages
+
+```{r}
+
+```
+
+```{r}
+library(tidyverse)
+library(purrr)
+library(rstatix)
+```
+
+## Script Variables
+```{r}
+OUTPATH = "~/health_records/smueller/phers/tables/"
+SCRIPT = "DisOver"
+DATE = Sys.Date()
+```
+
+# Load sample data per disease
+```{r, eval=T}
+#Phenotype Risk Scores per disease
+file_list = list.files("/home/smueller/health_records/smueller/phers/samples",
+                        pattern="samples_ccratio_4.csv$")
+
+sample_info_LIST = list()
+
+#loop over diseases
+for (i in 1:length(file_list)){
+  
+  disease = str_replace(file_list[i],pattern="_samples_ccratio_4.csv", replacement = "" ) 
+  
+  # read sample info
+  sample_info_LIST[[i]] = read.csv(paste0("/home/smueller/health_records/smueller/phers/samples/",(file_list[i]))) %>% 
+    mutate(disease = disease) 
+}
+  
+sample_info = map_dfr(sample_info_LIST, rbind)
+```
+
+# Look at Age of Onset
+
+```{r}
+#summarise info per disease and particiapnt type (ie. control, case with PRS "0" or case)
+sum.dis = sample_info %>% 
+  filter(Pheno!="Control") %>% 
+  group_by(disease) %>% 
+  summarise(Number =n(),
+    Median_age = median(age),
+    IQR_age = quantile(age,probs = 0.75)-quantile(age,probs = 0.25),
+    Median_age_of_onset = median(age_of_onset, na.rm = T),
+    IQR_age_of_onset = quantile(age_of_onset, probs=0.75,na.rm = T) - 
+      quantile(age_of_onset, probs=0.25,na.rm = T),
+    Num_age_of_onset_missing = sum(is.na(age_of_onset)),
+    Prop_age_of_onset_missing = Num_age_of_onset_missing/Number,
+    Median_encounters = median(Number_uniq_encoutner),
+    IQR_encounters = quantile(Number_uniq_encoutner,probs = 0.75)-quantile(Number_uniq_encoutner,probs = 0.25),
+    Median_Record_Length = median(Record_Length),
+    IQR_Record_Length = quantile(Record_Length,probs = 0.75)-quantile(Record_Length,probs = 0.25),
+    Median_Number_uniq_ICD = median(Number_uniq_ICD),
+    IQR_Number_uniq_ICD = quantile(Number_uniq_ICD,probs = 0.75)-quantile(Number_uniq_ICD,probs = 0.25)) 
+
+
+# save
+#write_csv(sum.phers_and_pheno, 
+#          paste0(OUTPATH,"suppl_table.",SCRIPT,".summary_stat.",DATE,".csv"))
+```
+
+## Plot histogram of age of onset
+
+
+```{r,eval=T}
+options(bitmapType="cairo")
+X11(type = 'cairo')
+
+sum.dis %>% 
+  ggplot(aes(Median_age_of_onset)) + 
+  geom_histogram()
+```
+
+## Table
+```{r}
+sum.dis %>% 
+  select(disease, Median_age_of_onset, Prop_age_of_onset_missing) %>% 
+  mutate(Age_Classifier =ifelse(Median_age_of_onset==0, "At birth",
+                         ifelse(Median_age_of_onset<18, "Before 18",
+                         ifelse(Median_age_of_onset>60,"Over 60",
+                         ifelse(Median_age_of_onset>40,"Over 40", "Between 18 and 40"))))) %>% 
+  myDT()
+```
+
+```{r}
+sum.dis %>% 
+  select(disease, Median_age_of_onset, Prop_age_of_onset_missing) %>% 
+  mutate(Age_Classifier =ifelse(Median_age_of_onset==0, "At birth",
+                         ifelse(Median_age_of_onset<18, "Before 18",
+                         ifelse(Median_age_of_onset>60,"Over 60",
+                         ifelse(Median_age_of_onset>40,"Over 40", "Between 18 and 40"))))) %>% 
+  count(Age_Classifier)
+```
+
+
+# Combine statistical results
+```{r}
+file_list2 = list.files(path="/home/smueller/health_records/smueller/phers/stat" ,pattern="assoc.stat.csv")
+
+stat_LIST = list()
+for(i in 1:length(file_list2)){
+  
+  stat_LIST[[i]] = read.csv(paste0("/home/smueller/health_records/smueller/phers/stat/",file_list2[i])) %>% 
+    mutate(disease = str_replace(file_list2[i], pattern = ".assoc.stat.csv", replacement = ""))
+  
+}
+
+sum.stat = map_dfr(stat_LIST, rbind) %>% 
+  select("Normalised_Disease", "Assoc_Method", "Assoc_Alternative", 
+"Assoc_Statistic", "Assoc_PValues", "proportion_cases_with_phers0", "disease") %>% 
+  mutate(Assoc_P.FDR = p.adjust(Assoc_PValues, method = "BH")) %>% 
+  left_join(sum.dis) %>% 
+  mutate(Age_Classifier =ifelse(Median_age_of_onset==0, "At birth",
+                         ifelse(Median_age_of_onset<18, "Before 18",
+                         ifelse(Median_age_of_onset>60,"Over 60",
+                         ifelse(Median_age_of_onset>40,"Over 40", "Between 18 and 40"))))) %>% 
+    mutate(is_significant =ifelse(Assoc_P.FDR<0.05, "YES","NO")) 
+
+```
+
+## How many significant results?
+```{r}
+sum.stat %>% 
+  ggplot(aes(is_significant,fill=is_significant)) +
+  geom_bar(position = "dodge")
+```
+
+```{r}
+sum.stat %>% 
+  count(is_significant)
+```
+
+
+## Difference in age groups?
+```{r}
+sum.stat %>% 
+  ggplot(aes(Age_Classifier,  fill=is_significant)) +
+  geom_bar(position = "dodge")
+```
+
+# Calculate Statistical Power
+```{r}
+file_list = list.files("/home/smueller/health_records/smueller/phers/samples",
+                        pattern="samples_ccratio_4.csv$")
+
+effect_LIST = list()
+
+for(i in 1:length(file_list)){
+  
+  dis = str_replace(file_list[i],pattern="_samples_ccratio_4.csv", replacement = "" )
+  Normalised_Disease = str_replace_all(dis, pattern = "_", replacement =" ")
+
+  samples = read.csv(paste0("~/health_records/smueller/phers/samples/",dis,"_samples_ccratio_4.csv")) %>% 
+    select(participant_id, Pheno)
+  
+  phers= read.delim(paste0("~/health_records/smueller/phers/phers/",dis,".phers.txt")) %>% 
+    select(1,2)
+  
+  samples_phers = samples %>%
+    right_join(phers)
+  
+  effect_LIST[[i]] = wilcox_effsize(data=samples_phers,
+                 formula= PRS~Pheno, 
+                 alternative = "greater",
+                 ci=T) %>% 
+    mutate(Normalised_Disease=Normalised_Disease)
+}
+
+# combine
+effect_size = map_dfr(effect_LIST,rbind)
+
+# join with sum.stat and save
+sum.stat2 = sum.stat %>% 
+  left_join(effect_size %>%  select(Normalised_Disease, effsize, magnitude),
+            by="Normalised_Disease" )
+
+# save
+write_csv(sum.stat2, 
+          paste0(OUTPATH,"suppl_table.",SCRIPT,".summary_all_stats.",DATE,".csv"))
+
+```
+
+## Plot effect size against significane
+```{r}
+sum.stat2 %>% 
+  ggplot(aes(-log10(Assoc_PValues), effsize, color= is_significant))+
+  geom_point(size=2)
+```
+
+```{r}
+sum.stat2 %>% 
+  ggplot(aes(-log10(Assoc_PValues), magnitude))+
+  geom_boxplot(fill=NA, outlier.colour = NA) +
+  geom_point(aes(color=is_significant),size=2, position = position_jitter(height = 0.3))
+```
+

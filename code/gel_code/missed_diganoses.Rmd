@@ -1,0 +1,199 @@
+---
+title: "missed_diagnoses"
+author: "Stefanie Mueller"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    lightbox: true
+    gallery: true
+    toc_depth: 3
+    use_bookdown: true
+    fig_caption: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+# load libraries
+library(knitr)
+library(rmdformats)
+
+# define functions
+myDT = function(data){
+  data %>% DT::datatable(rownames = FALSE,
+    filter = 'bottom',
+    extensions = 'Buttons',
+      options = list(
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel'))
+    )
+}
+
+## Global options
+#options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=TRUE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 10)
+opts_knit$set(width=75)
+```
+
+# PREFACE
+**PROJECT**:  Phenotype Risk Scores  
+**OBJECTIVE**:  Identidy individuals with missed diagnoses   
+**DEPENDENCE**:  phers.R    
+**REQUIREMENT**:  R 3.5.0   
+<br>
+
+## Load packages
+```{r}
+library(tidyverse)
+library(purrr)
+```
+
+## Script Variables
+```{r}
+OUTPATH = "~/health_records/smueller/phers/tables/"
+SCRIPT = "MissDiag"
+DATE = Sys.Date()
+```
+
+# Load PheRS for and case/control status
+```{r, eval=T}
+#Phenotype Risk Scores per disease
+phers_list = list.files("/home/smueller/health_records/smueller/phers/samples",
+                        pattern="samples_ccratio_4.csv$")
+
+phers_and_pheno_LIST = list()
+
+#loop over diseases
+for (i in 1:length(phers_list)){
+  
+  disease = str_replace(phers_list[i],pattern="_samples_ccratio_4.csv", replacement = "" ) 
+  
+  # read phers
+  phers= read.delim(paste0("~/health_records/smueller/phers/phers/",disease,".phers.txt")) %>% 
+    select(1,2)
+  
+  # read sample info
+  phers_and_pheno_LIST[[i]] =   read.csv(paste0("/home/smueller/health_records/smueller/phers/samples/",(phers_list[i]))) %>% 
+    mutate(disease = disease) %>% 
+    right_join(phers) 
+}
+
+```
+
+# Find threshold of 75% percentile in cases
+```{r}
+# function to get 75% percentile
+get_threshold_case_perc75 = function(data){
+  
+  disease = data$disease[1]
+  
+  thresh = data %>% 
+    filter(isCase) %>% 
+    select(PRS) %>% 
+    unlist() %>% 
+    quantile(0.75)
+  
+  out =data.frame(disease = disease,
+                  threshold = thresh)
+  return(out)
+  
+}
+
+case_perc75 = function(data){
+  
+  thresh = data %>% 
+    filter(isCase) %>% 
+    select(PRS) %>% 
+    unlist() %>% 
+    quantile(0.75)
+  
+  exceeding = data %>%
+    filter(!isCase) %>% 
+    filter(PRS>= thresh) 
+  
+  return(exceeding)
+  
+}
+
+threshold_case_perc75_LIST = map(phers_and_pheno_LIST, ~ get_threshold_case_perc75(.x))
+
+controls_exceeding_c75_LIST = map(phers_and_pheno_LIST, ~ case_perc75(.x))
+
+threshold_case_perc75= map_dfr(threshold_case_perc75_LIST, rbind) %>% 
+    mutate(NonCaseExceeding = lapply(controls_exceeding_c75_LIST,nrow) %>% unlist()) 
+
+controls_exceeding_c75 = map_dfr(controls_exceeding_c75_LIST, rbind)
+
+```
+
+## Save
+```{r}
+write_csv(threshold_case_perc75, 
+          paste0(OUTPATH,"suppl_table.",SCRIPT,".case_q75_threshold.",DATE,".csv"))
+write_csv(controls_exceeding_c75, 
+          paste0(OUTPATH,"suppl_table.",SCRIPT,".case_q75_threshold_exceeding_samples.",DATE,".csv"))
+```
+
+## what is the thrshold and how many controls have PheRS above it
+```{r}
+threshold_case_perc75 %>% 
+  myDT()
+```
+
+## plot some info
+```{r}
+threshold_case_perc75= read.csv("~/health_records/smueller/phers/tables/suppl_table.MissDiag.case_q75_threshold.2020-10-22.csv")
+controls_exceeding_c75 = read.csv("~/health_records/smueller/phers/tables/suppl_table.MissDiag.case_q75_threshold_exceeding_samples.2020-10-22.csv")
+sum.stat = read.csv("~/health_records/smueller/phers/tables/suppl_table.DisOver.summary_all_stats.2020-10-26.csv")
+
+```
+
+### Histogram of threshold for identification of closer inspetion of Non-cases
+ 
+removed disease with non significant result
+```{r}
+options(bitmapType="cairo")
+X11(type = 'cairo')
+
+controls_exceeding_c75 %>% 
+  group_by(disease) %>% 
+  summarise(Number=n()) %>% 
+  left_join(threshold_case_perc75) %>% 
+  left_join(sum.stat, by="disease") %>% 
+  filter(is_significant=="YES") %>% 
+  ggplot(aes(threshold)) +
+  geom_histogram()+
+  labs(x="Threshold \n75% Percentile Cases")
+```
+
+
+### Number of Non-Cases above threshold vs threshold straified my effect size magnitude
+
+removed disease with non significant result
+```{r}
+controls_exceeding_c75 %>% 
+  group_by(disease) %>% 
+  summarise(Number=n()) %>% 
+  left_join(threshold_case_perc75) %>% 
+  left_join(sum.stat, by="disease") %>% 
+  filter(is_significant=="YES") %>% 
+  ggplot(aes(threshold,Number.x)) +
+  geom_point(aes(color=magnitude), size=2)+
+  scale_y_log10(labels=c(1,3,10,30,100,300,1000,3000),
+                breaks=c(1,3,10,30,100,300,1000,3000)) +
+  labs(x="Threshold \n75% Percentile Cases", y="Number Non-Cases with\n PheRS above threshold\n (log Scale)")
+```
+

@@ -1,0 +1,437 @@
+---
+title: "generate_PherRS"
+author: "Stefanie Mueller"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    lightbox: true
+    gallery: true
+    toc_depth: 3
+    use_bookdown: true
+    fig_caption: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+# load libraries
+library(knitr)
+library(rmdformats)
+
+## Global options
+#options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=TRUE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 10)
+opts_knit$set(width=75)
+```
+
+# PREFACE
+**PROJECT**:  Phenotype Risk Scores  
+**OBJECTIVE**:  Calculate Phenotype Risk Scores and create matched Case/Control Sets   
+**DEPENDENCE**:  ~/health_records/phenotype_extraction/global.R for ICD10 code extractions       
+**REQUIREMENT**:  R 3.5.0   
+**CONTRIBUTION**: Stefanie Mueller, Rini Veeravalli, Johan Thygesen (phenotype extractions)   
+<br>
+
+## Load packages
+```{r}
+library(tidyverse)
+library(data.table)
+library(MatchIt)
+library(tableone)
+library(captioner)
+library(ggpubr)
+library(ggstatsplot)
+library(optmatch)
+```
+
+## Script Variables
+```{r}
+OUTPATH = "~/health_records/smueller/phers/"
+SCRIPT = "MakePheRS"
+DATE = Sys.Date()
+path_ref="~/re_gecip/health_records/PheRS/ref_data/"
+```
+
+
+# Load mappings
+## map: Normalised Specifc Disease to OMIM
+```{r}
+# disease mappings
+map_disease_omim = read.csv("/home/smueller/re_gecip/health_records/smueller/phers/omimdb.csv",
+                             stringsAsFactors = F) %>% 
+  select(1,"OMIM_ID" =OMIM)
+```
+
+## map: OMIM to HPO map
+```{r}
+map_omim_hpo = read.delim(paste0(path_ref, "phenotype_annotation_new.tab"), stringsAsFactors = F) %>%
+  filter(DB == "OMIM") %>%
+  select(DB_Object_ID, HPO_ID, Evidence_Code)
+```
+
+## map: HPO to Phecode
+```{r}
+map_hpo_phe = read_csv(paste0(path_ref,"hpo_phecode_mapping.csv"), col_types = "iccccccc")
+# changing column names by replacing spaces with ..
+names(map_hpo_phe)[2] = "HPO.term_id"
+names(map_hpo_phe)[7] = "suppress."
+```
+
+## map: PheCode to ICD10
+```{r}
+map_phe_icd10 = read_delim(paste0(path_ref,"icd10_phe_mapping_cleaned.txt"), col_types = "cc", delim = "\t") %>%
+  distinct() %>%
+  select("ICD10" = 1, PHECODE) %>%
+  mutate(PhecodeCHR = as.character(as.numeric(PHECODE))) 
+### PhecodeCHR preserves original phecode format i.e. removes .0
+```
+
+# Load data
+## ICD10 codes from available sources in GeL
+```{r}
+# load ICD codes from data release V10
+load("/home/smueller/health_records/phenotype_extraction/extracts/icd10.RData")
+
+# generate summary of available EHR per participant
+code_stat_per_participant = icd10 %>% 
+  # remove records with suspicous values
+  filter(QC_errors==0) %>% 
+  group_by(participant_id) %>% 
+  dplyr::summarise(Number_uniq_ICD = length(unique(icd10)),
+            Number_uniq_encoutner = length(unique(date)),
+            First_encounter = min(date),
+            Last_encounter = max(date)) %>% 
+  mutate(Record_Length = year(Last_encounter) -year(First_encounter))
+
+write_csv(code_stat_per_participant, 
+          paste0(OUTPATH,"tables/suppl_table.",SCRIPT,".summary_stat_EHR_per_participant.",DATE,".csv"))
+
+```
+
+
+
+
+
+icds = icd10 %>% 
+  filter(QC_errors==0) %>% 
+  select(participant_id, icd10) %>% 
+  distinct()
+
+disease_label = fread("~/health_records/smueller/phers/rare_diseases_participant_dise_2020-09-30_21-28-26.tsv") %>% 
+  select(participant_id=1, starts_with("Normalised")) 
+
+
+# load age of onset data
+raredisease_ageofonset = fread("~/health_records/smueller/phers/rare_diseases_participant_dise_2020-10-14_13-12-13.tsv") %>% 
+  select("participant_id" = `Participant Id`,
+         "age_of_onset" = `Age Of Onset`) %>% 
+  filter(!is.na(age_of_onset)) %>% 
+  filter(age_of_onset >-1 &age_of_onset <100)
+
+participants = fread("~/health_records/smueller/phers/participant_2020-09-30_21-32-20.tsv") %>% 
+  select("participant_id" =`Participant Id`,
+         "programme"=Programme,
+         "year_of_birth"=`Year Of Birth`,
+         "participant_phenotypic_sex"=`Participant Phenotypic Sex`,
+         "participant_type"=`Participant Type`) %>% 
+  filter(participant_phenotypic_sex != "Indeterminate") %>% 
+  left_join(code_stat_per_participant) %>% 
+  left_join(raredisease_ageofonset)
+
+
+icds_admidate_pre2014 = read.csv("/home/smueller/health_records/PheRS/participants_admidate_pre2014.txt") %>% 
+  select(participant_id) %>% 
+  distinct()
+
+
+# ICD10 data of Total participants with EHR data and admission date of > 5 years
+population_icds = icds %>%
+  select(participant_id, icd10) %>%
+  filter(participant_id %in% icds_admidate_pre2014$participant_id) %>%
+  left_join(map_phe_icd10, by = c("icd10" = "ICD10")) 
+
+# Participant data of Total participants with EHR data and admission date of > 5 years and disease data
+population_participants = population_icds %>%
+  select(participant_id) %>%
+  distinct() %>%
+  left_join(participants, by = "participant_id") %>% 
+  mutate(age = 2020 - year_of_birth,
+         binaryGender = ifelse(participant_phenotypic_sex == "Male", 1, 0)) %>% 
+  left_join(disease_label) %>%
+  filter(!is.na(`Normalised Specific Disease`))
+
+# Number of total participants with EHR data and admission date of > 5 years
+
+ALLNUM = unique(population_icds$participant_id) %>%
+  length()
+
+
+# Create functions ------------------------------------
+
+# calculate_phers()           # calculate phers and create table of phers results, and create summary text, returns disease dataset
+# create_case_control_sets()  # create case and control datasets
+# compare_case_controls()     # create boxplot and histogram to compare cases and controls
+
+
+calculate_phers <- function(disease_filename, disease_index) {
+  disease = list()
+  disease$OMIM = unique(unlist(strsplit(unlist(as.character(map_disease_omim$OMIM_ID[disease_index])), split = ",")))  
+  disease$hpo = unique(map_omim_hpo[map_omim_hpo$DB_Object_ID %in% disease$OMIM, "HPO_ID"])
+  disease$hpo_clean = str_extract(disease$hpo, "[0-9]*$") %>%
+    as.integer()
+  # exclude HPO terms: with NA phecode, not suppress 
+  disease$phe = map_hpo_phe %>%
+    filter(HPO.term_id %in% disease$hpo_clean) %>%
+    filter(!is.na(phecode)) %>%
+    filter(suppress. < 1) %>%
+    select(2, 3, 4, 5) %>%
+    distinct()
+  disease$icds = map_phe_icd10 %>%
+    filter(PhecodeCHR %in% disease$phe$phecode) %>%
+    distinct()
+  # phe and icds are not unique, instead tables with distinct rows
+  
+  # Calculate frequency of disease phecodes
+  # Filter icds of population to disease icds and get associated disease phecodes
+
+  disease$weight_phe = population_icds %>%
+    filter(icd10 %in% disease$icds$ICD10) %>% 
+    filter(PhecodeCHR %in% disease$icds$PhecodeCHR) %>%
+    select(participant_id, PhecodeCHR) %>%
+    distinct() %>%
+    count(PhecodeCHR) %>%
+    mutate(weight = log(ALLNUM / n))
+  
+
+  # Calculate PRS for all participants with at least one of ICDs of interest
+  PRS_one = population_icds %>%
+    inner_join(disease$weight_phe, by = "PhecodeCHR") %>%
+    group_by(participant_id) %>%
+    filter(!duplicated(PhecodeCHR)) %>%
+    summarise(PRS = sum(weight))
+  
+  # Fill up missing PRS, owning to no ICD hit, with zeros
+  PRS_two = population_icds %>%
+    select(participant_id) %>%
+    filter(!participant_id %in% PRS_one$participant_id) %>%
+    distinct() %>%
+    mutate(PRS = 0)
+  
+  # Bind both databases and write out
+  PRS = rbind(PRS_one, PRS_two) %>%
+    arrange(participant_id) %>%
+    mutate(OMIM = paste0(disease$OMIM, collapse = ","))
+  
+  # Save PheRS results
+  write.table(PRS, paste0("phers/", disease_filename, ".phers.txt"), col.names = T, row.names = F, quote = F, sep = "\t")
+  
+  # Create and save summary of uniqe disease-related codes
+  outSummary <- setNames(data.frame(matrix(ncol = 13, nrow = 0)), 
+                         c("Disease", "number_OMIM", "number_HPO_terms", "number_Phecodes",
+                           "number_observed_Phecodes", "number_ICD", "max_PRS_theo", "max_PRS_obs", "percentage_zero"))
+  outSummary = data.frame(Disease = map_disease_omim$NormalisedSpecificDisease[disease_index],
+                          number_OMIM = length(unique(disease$OMIM)),
+                          number_HPO_terms = length(unique(disease$hpo_clean)),
+                          number_Phecodes = length(unique(disease$phe$phecode)),
+                          number_observed_Phecodes = length(unique(disease$phe$phecode) %in% icds$PHECODE),
+                          number_ICD = length(unique(disease$icds$ICD10)),
+                          max_PRS_theo = sum(disease$weight_phe$weight),
+                          max_PRS_obs = max(PRS$PRS),
+                          percentage_zero = (nrow(PRS_two) / ALLNUM)
+  )
+  write.csv(outSummary, paste0("summary/", disease_filename, "_summary.txt"), row.names = FALSE)
+
+  # save disease list as R object for future evaluation of which codes mapped to disease
+  save(disease, file = paste0("summary/", disease_filename, "_codes.RData"))
+  
+  return(disease)
+} 
+
+
+create_case_control_sets <- function(disease_filename, disease_index, ccratio) {
+  disease_interest = disease_label %>%
+    filter(`Normalised Specific Disease` == map_disease_omim$NormalisedSpecificDisease[disease_index]) %>% 
+    select(participant_id, `Normalised Specific Disease`)
+  
+  selected_cases = disease_interest %>% 
+    inner_join(population_participants) %>% 
+    filter(!duplicated(participant_id)) %>%
+    mutate(Pheno = "Case")
+
+  any(duplicated(selected_cases$participant_id))
+  
+  demographics_cases = selected_cases %>% 
+    summarise(Avg_age = mean(age),
+              PercFem = mean(binaryGender),
+              Count = n())
+
+  
+  # --- remove participants with diagnosis from possible controls before matching
+  possible_controls = population_participants %>% 
+    # remove all participants_ids of participants in selected_cases
+    filter(!participant_id %in% selected_cases$participant_id) %>%
+    # remove all partcipant_ids with diseases in selected_cases
+    filter(!`Normalised Disease Group` %in% selected_cases$`Normalised Disease Group`) %>% 
+    filter(!`Normalised Specific Disease` %in% selected_cases$`Normalised Specific Disease`) %>% 
+    distinct() %>%
+    filter(!duplicated(participant_id)) %>% 
+    mutate(Pheno = "Control")
+  
+  together = rbind(selected_cases[, c("participant_id", "age",
+                                      "binaryGender", "Pheno","Number_uniq_ICD",
+                                      "Number_uniq_encoutner","Record_Length","age_of_onset")],
+                   possible_controls[, c("participant_id", "age", "binaryGender",
+                                         "Pheno","Number_uniq_ICD",
+                                         "Number_uniq_encoutner","Record_Length","age_of_onset")]) %>% 
+    mutate(isCase = ifelse(Pheno == "Case", T, F)) %>% 
+    mutate(factorGender = ifelse(binaryGender == 1, "male", "female") %>%
+             as.factor)
+  
+  
+  # --- match controls
+  set.seed(1)
+  options("optmatch_max_problem_size" = Inf)
+  match <- matchit(isCase ~ age + factorGender ,
+                   data = together[, c("participant_id", "age",
+                                       "Pheno","isCase",'factorGender')],
+                   method = "optimal", ratio = ccratio)
+  
+  # Save descriptive summary of case/control samples
+  capture.output(summary(match), file = paste0("samples/", disease_filename,"_samples_summary_ccratio_", ccratio,".txt"))
+  
+  df.match <- match.data(match) %>% 
+    left_join(together[,c("participant_id", "Number_uniq_ICD", "Number_uniq_encoutner", 
+                          "Record_Length","age_of_onset")], by="participant_id")
+  
+  # --- write out case/control samples
+  df.match %>% 
+    write.csv(paste0("samples/", disease_filename,"_samples_ccratio_", ccratio,".csv"))
+  
+}
+
+
+compare_case_controls <- function(disease_filename, disease, disease_index, ccratio) {
+  
+  # --- combine case/control samples with their phers
+  sam = read.csv(paste0("samples/", disease_filename,"_samples_ccratio_", ccratio,".csv"))
+  PRS = read.delim(paste0("phers/", disease_filename, ".phers.txt"))
+  sampPheRS = sam %>% 
+    inner_join(PRS, by = "participant_id") 
+  
+ 
+  # --- Non-parametric comparison between phers and case status
+  assoc = wilcox.test(PRS ~ Pheno, data = sampPheRS, alternative="greater")
+
+ 
+  # --- save summary stat
+  proportion_cases_with_phers0 = sampPheRS %>% 
+    filter(Pheno=="Case") %>% 
+    summarise(prop0 =mean(PRS==0))
+  
+  
+  stat_sum = data.frame( Normalised_Disease = map_disease_omim$NormalisedSpecificDisease[disease_index],
+    Assoc_Method = assoc$method,
+    Assoc_Alternative = assoc$alternative,
+    Assoc_Statistic = assoc$statistic,
+    Assoc_PValues = assoc$p.value,
+    proportion_cases_with_phers0 = proportion_cases_with_phers0$prop0)
+  
+  write.csv(stat_sum, paste0("stat/",disease_filename,".assoc.stat.csv"))
+  
+  
+  # --- Plot
+  # set color levels
+  col <- c("grey30", "#045a8d")
+  
+  
+  sampPheRS = sampPheRS %>% 
+    mutate(PhenotypeStatus = plyr::revalue(Pheno,
+                                        c("Case" = paste0('Case \n','n=', nrow(sampPheRS[sampPheRS$Pheno == "Case", ])),
+                                          "Control" = paste0('Control', '\n', 'n=', nrow(sampPheRS[sampPheRS$Pheno == "Control", ])))))
+  
+  mean.data = sampPheRS %>% 
+    group_by(PhenotypeStatus) %>% 
+    summarise(mean = mean(PRS, na.rm = T),
+              label = paste("list(~italic(mu) ==", round(mean, digits = 3), ")"))
+
+  boxplot = sampPheRS %>% 
+    ggplot(aes(y = PRS, x = PhenotypeStatus, col = PhenotypeStatus)) + 
+    theme_bw() +
+    geom_point(position = position_jitter(width = 0.5, height = 0, seed=42), alpha = 0.3, size = 3) +
+    geom_boxplot(width = 0.8, alpha = 0.2, fill = "white", 
+                 outlier.shape = NA, color = "grey20", size = 1.5,
+                 position = ggplot2::position_dodge(width = NULL)) +
+    stat_summary(fun = mean, geom = "point", size = 4, color = "red") +
+    ggrepel::geom_label_repel(data = mean.data, aes(x = PhenotypeStatus, y = mean, label = label),
+                              color = "black", parse = TRUE, nudge_x = -0.3) + 
+    scale_colour_manual(values = col, guide = F) +
+    labs(y = "Phenotype Risk Score", x = "Phenotype Status",
+         title = paste0(map_disease_omim$NormalisedSpecificDisease[disease_index])) +
+    theme(title = element_text(size=rel(1.3), face = "bold"),
+          axis.title.y = element_text(vjust=1.5),
+          axis.title.x = element_text(vjust=-1.5),
+          axis.text = element_text(size=rel(1.25)),
+          legend.text = element_text(size=rel(1.3)),
+          strip.text = element_text(size=rel(1.3)),
+          plot.margin = unit(c(1,1,1,2), "cm"),
+          panel.grid.major = element_line(colour="grey60")) +
+    stat_compare_means(comparisons = list(c(1, 2)), method = "wilcox.test",
+                       method.args = list(alternative = "greater"),
+                       label = "p.signif", bracket.size = 0.5, text.size = 2) + 
+    stat_compare_means(label.y = max(sampPheRS$PRS) * 1.2) 
+
+  
+  boxplot %>% 
+    ggsave(filename = paste0("boxplot_test/", disease_filename, "_ccratio_", ccratio, ".pdf"),
+           width = 9, height = 6)
+  
+  # --- Histogram
+  ggsave(
+    (sampPheRS %>%
+       ggplot(aes(x = PRS, fill = PhenotypeStatus, col = PhenotypeStatus)) + 
+       theme_bw() +
+       geom_histogram() +
+       scale_colour_manual(values = col) +
+       scale_fill_manual(values = col) +
+       facet_grid(PhenotypeStatus~., scales = "free_y") +
+       labs(x = paste0("PheRS of ", map_disease_omim$NormalisedSpecificDisease[disease_index])) +   
+       theme(title        = element_text(size = rel(1.3), face = "bold"),
+             axis.title.y = element_text(vjust = 1.5),
+             axis.title.x = element_text(vjust = -1.5),
+             axis.text    = element_text(size = rel(1.25)),
+             legend.text  = element_text(size = rel(1.3)),
+             strip.text   = element_text(size = rel(1.3)),
+             plot.margin  = unit(c(1, 1, 1, 2), "cm"),
+             panel.grid.major = element_line(colour="grey80"))),
+    
+    filename = paste0("hist_test/", disease_filename, "_ccratio_", ccratio, "_hist.pdf"),
+    width = 9, height = 6
+  )  
+  
+
+}
+
+# Run main script -------------------------------------
+
+# ccratio specifies ratio of controls to cases
+ccratio = 4
+for (row in 1:nrow(map_disease_omim)) {
+  print(row)
+  tryCatch({
+    disease_filename = str_replace_all(pattern = " ", replacement = "_",map_disease_omim$NormalisedSpecificDisease[row])
+    #disease = calculate_phers(disease_filename, row)
+    create_case_control_sets(disease_filename, row, ccratio)
+    compare_case_controls(disease_filename, disease, row, ccratio)
+   }, error=function(e){cat("ERROR :", conditionMessage(e), "\n")})
+}
+
