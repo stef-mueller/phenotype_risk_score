@@ -1,0 +1,266 @@
+---
+title: "Inspect_Cases_with_PRS_0"
+author: "Stefanie Mueller"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    lightbox: true
+    gallery: true
+    toc_depth: 3
+    use_bookdown: true
+    fig_caption: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+# load libraries
+library(knitr)
+library(rmdformats)
+
+## Global options
+#options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=TRUE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 10)
+opts_knit$set(width=75)
+```
+
+# PREFACE
+**PROJECT**:  Phenotype Risk Scores  
+**OBJECTIVE**:  Inspect recruited participants with PheRS "0" for recruitment disease   
+**DEPENDENCE**:  phers.R    
+**REQUIREMENT**:  R 3.5.0   
+<br>
+
+## Load packages
+```{r}
+library(tidyverse)
+library(purrr)
+library(dominanceanalysis)
+library(GGally)
+library(ggpubr)
+```
+
+## Script Variables
+```{r}
+OUTPATH = "~/health_records/smueller/phers/tables/"
+SCRIPT = "SC_Case0"
+DATE = Sys.Date()
+```
+
+# Load data
+```{r, eval=T}
+#Phenotype Risk Scores per disease
+phers_list = list.files("/home/smueller/health_records/smueller/phers/samples",
+                        pattern="samples_ccratio_4.csv$")
+
+phers_and_pheno_LIST = list()
+
+#loop over diseases
+for (i in 1:length(phers_list)){
+  
+  disease = str_replace(phers_list[i],pattern="_samples_ccratio_4.csv", replacement = "" ) 
+  
+  # read phers
+  phers= read.delim(paste0("~/health_records/smueller/phers/phers/",disease,".phers.txt")) %>% 
+    select(1,2)
+  
+  # read sample info
+  phers_and_pheno_LIST[[i]] =   read.csv(paste0("/home/smueller/health_records/smueller/phers/samples/",(phers_list[i]))) %>% 
+    mutate(disease = disease) %>% 
+    left_join(phers) %>% 
+    mutate(Type = ifelse(Pheno == "Control", "Control", ifelse(PRS==0, "Case0","Case")))
+}
+
+phers_and_pheno = map_dfr(phers_and_pheno_LIST, rbind)
+```
+
+# Make Summary Stat
+## Per participants type in disease: ie. Case, Case0, Control
+```{r, eval=F}
+#summarise info per disease and particiapnt type (ie. control, case with PRS "0" or case)
+sum.phers_and_pheno = phers_and_pheno %>% 
+  group_by(disease, Type) %>% 
+  summarise(Number =n(),
+    Median_age = median(age),
+    IQR_age = quantile(age,probs = 0.75)-quantile(age,probs = 0.25),
+    Median_age_of_onset = median(age_of_onset, na.rm = T),
+    IQR_age_of_onset = quantile(age_of_onset, probs =0.75,na.rm = T)- 
+      quantile(age_of_onset, probs =0.75,na.rm = T),
+    Median_encounters = median(Number_uniq_encoutner),
+    IQR_encounters = quantile(Number_uniq_encoutner,probs = 0.75)-quantile(Number_uniq_encoutner,probs = 0.25),
+    Median_Record_Length = median(Record_Length),
+    IQR_Record_Length = quantile(Record_Length,probs = 0.75)-quantile(Record_Length,probs = 0.25),
+    Median_Number_uniq_ICD = median(Number_uniq_ICD),
+    IQR_Number_uniq_ICD = quantile(Number_uniq_ICD,probs = 0.75)-quantile(Number_uniq_ICD,probs = 0.25)) 
+
+
+# save
+write_csv(sum.phers_and_pheno, 
+          paste0(OUTPATH,"suppl_table.",SCRIPT,".summary_stat.",DATE,".csv"))
+```
+
+
+```{r}
+sum.phers_and_pheno= read.csv("~/health_records/smueller/phers/tables/suppl_table.SC_Case0.summary_stat.2020-10-13.csv")
+```
+
+## For cases in disease
+```{r}
+#summarise info per disease and particiapnt type (ie. control, case with PRS "0" or case)
+sum.dis = phers_and_pheno %>% 
+  filter(Type!="Control") %>% 
+  group_by(disease) %>% 
+  summarise(Number =n(),
+    Median_age = median(age),
+    IQR_age = quantile(age,probs = 0.75)-quantile(age,probs = 0.25),
+    Median_age_of_onset = median(age_of_onset, na.rm = T),
+    IQR_age_of_onset = quantile(age_of_onset, probs=0.75,na.rm = T) - 
+      quantile(age_of_onset, probs=0.25,na.rm = T),
+    Num_age_of_onset_missing = sum(is.na(age_of_onset)),
+    Prop_age_of_onset_missing = Num_age_of_onset_missing/Number,
+    Median_encounters = median(Number_uniq_encoutner),
+    IQR_encounters = quantile(Number_uniq_encoutner,probs = 0.75)-quantile(Number_uniq_encoutner,probs = 0.25),
+    Median_Record_Length = median(Record_Length),
+    IQR_Record_Length = quantile(Record_Length,probs = 0.75)-quantile(Record_Length,probs = 0.25),
+    Median_Number_uniq_ICD = median(Number_uniq_ICD),
+    IQR_Number_uniq_ICD = quantile(Number_uniq_ICD,probs = 0.75)-quantile(Number_uniq_ICD,probs = 0.25)) 
+```
+
+
+# Logistic Model Case Type 
+**Model**: Case0 ~ age + Number_uniq_ICD + Number_uniq_encoutner +Record_Length +age_of_onset  
+
+```{r}
+# define functions
+LogReg_model = function(data){
+  
+  model = glm(data=data, family = "binomial",
+      formula = CaseType ~ age + Number_uniq_ICD + Number_uniq_encoutner + Record_Length + age_of_onset)
+  
+  return(model)
+}
+
+summarise_LogReg_model = function(LogReg_model){
+  
+  out = data.frame(LogReg_Coef_Intercept = LogReg_model$coefficients[1],
+                   LogReg_Coef_Age = LogReg_model$coefficients[2],
+                   LogReg_Coef_Number_uniq_ICD = LogReg_model$coefficients[3],
+                   LogReg_Coef_Number_uniq_encoutner = LogReg_model$coefficients[4],
+                   LogReg_Coef_Record_Length = LogReg_model$coefficients[5],
+                   LogReg_Coef_Age_of_onset = LogReg_model$coefficients[6],
+                   LogReg_AIC = LogReg_model$aic,
+                   LogReg_deviance_fit = LogReg_model$deviance,
+                   LogReg_deviance_Null = LogReg_model$null.deviance)
+  return(out)
+}
+```
+
+```{r, eval=F}
+# apply function per disease
+glm_stats = phers_and_pheno %>% 
+  # remove control samples
+  filter(Type!="Control") %>% 
+  # remap factors for Case0 and Case so that Case0 will be first value
+  mutate(CaseType =factor(Type, levels = c("Case0","Case"))) %>% 
+  group_by(disease) %>% 
+  group_modify(~ summarise_LogReg_model(LogReg_model(.x)))
+
+# save
+write_csv(glm_stats, 
+          paste0(OUTPATH,"suppl_table.",SCRIPT,".log_reg.",DATE,".csv"))
+```
+
+```{r}
+glm_stats = read.csv("~/health_records/smueller/phers/tables/suppl_table.SC_Case0.log_reg.2020-10-14.csv")
+```
+
+
+# Varibale importance analysis
+**Problem**: since variable sin logistice regression are not scaled feature importance can't be infered from regression coeffiecents   
+**Method**: will use dominance analysis to estiamte feature importance of varables   
+**Reference**: https://cran.r-project.org/web/packages/dominanceanalysis/vignettes/da-logistic-regression.html   
+
+```{r}
+# define function
+summarise_variable_importance = function(LogReg_model){
+  boot_dom_aglm = bootAverageDominanceAnalysis(LogReg_model,R=100)
+  R2m = summary(boot_dom_aglm, fit.functions=c("r2.m"))
+  
+  out= data.frame(Boot100_General_Dominance_Age = R2m$r2.m$bs.E[1],
+                  Boot100_General_Dominance_Number_uniq_ICD = R2m$r2.m$bs.E[2],
+                  Boot100_General_Dominance_Number_uniq_encoutner = R2m$r2.m$bs.E[3],
+                  Boot100_General_Dominance_Record_Length = R2m$r2.m$bs.E[4],
+                  Boot100_General_Dominance_Age_of_onset = R2m$r2.m$bs.E[5])
+  
+  return(out)
+}
+```
+
+```{r, eval=F}
+# apply function per disease
+glm_importance_stats = phers_and_pheno %>% 
+  # remove control samples
+  filter(Type!="Control") %>% 
+  # remap factors for Case0 and Case so that Case0 will be first value
+  mutate(CaseType =factor(Type, levels = c("Case0","Case"))) %>% 
+  group_by(disease) %>% 
+  group_modify(~ summarise_variable_importance(LogReg_model(.x)))
+
+# save
+write_csv(glm_importance_stats,
+                    paste0(OUTPATH,"suppl_table.",SCRIPT,".feat_importance.",DATE,".csv"))
+```
+
+```{r}
+glm_importance_stats = read.csv("~/health_records/smueller/phers/tables/suppl_table.SC_Case0.feat_importance.2020-10-14.csv")
+```
+
+
+# Plots
+## Histogram of Proportion of Case0
+Q: Can we see clustering in diseases or normal distribution?   
+A: quite uniform distribution
+```{r, eval=T}
+options(bitmapType="cairo")
+X11(type = 'cairo')
+
+sum.phers_and_pheno %>% 
+  select(disease, Type, Number) %>% 
+  pivot_wider(id_cols = disease, names_from = Type, values_from = Number) %>% 
+  mutate(Prop_Case0 = Case0/(Case+Case0)) %>% 
+  ggplot(aes(Prop_Case0)) + 
+  geom_histogram(binwidth = 0.01) +
+  labs(title = "Histogram Proportion of Cases with PheRS == 0 per disease")
+```
+
+## Proportion of Case0 vs Median Age in disease
+Q: Is there a correlation between median age in cases and proportion of cases with PheRS "0"?   
+A: No
+```{r}
+options(bitmapType="cairo")
+X11(type = 'cairo')
+
+sum.phers_and_pheno %>% 
+  select(disease, Type, Number, Median_age) %>% 
+  pivot_wider(id_cols = disease, names_from = Type, values_from = Number) %>% 
+  mutate(Prop_Case0 = Case0/(Case+Case0)) %>% 
+  left_join(sum.dis) %>% 
+  ggplot(aes(Prop_Case0, Median_age)) + 
+  geom_point() +
+  labs(title = "Proportion of Cases with PheRS == 0 vs Median age in Cases per disease") +
+  geom_smooth(method="lm") +
+  stat_cor(label.y = 65) +
+  stat_regline_equation(label.y = 60)
+```
+
+
