@@ -1,0 +1,86 @@
+"","X","Normalised_Disease","Assoc_Method","Assoc_Alternative","Assoc_Statistic","Assoc_PValues","proportion_cases_with_phers0","FDR_PValues"
+"1","W","Amyotrophic lateral sclerosis or motor neuron disease","Wilcoxon rank sum test with continuity correction","greater",14149.5,1.13399446347075e-20,0.153846153846154,3.32377687569013e-20
+"2","W","Anophthalmia or microphthalmia","Wilcoxon rank sum test with continuity correction","greater",11655,0.00149722594342274,0.318840579710145,0.00195791084909128
+"3","W","Arrhythmogenic Right Ventricular Cardiomyopathy","Wilcoxon rank sum test with continuity correction","greater",58762,5.83261520499182e-85,0.259541984732824,5.50858102693672e-84
+"4","W","Arthrogryposis","Wilcoxon rank sum test with continuity correction","greater",18118,0.0690078419870849,0.417582417582418,0.0782088875853629
+"5","W","Atypical haemolytic uraemic syndrome","Wilcoxon rank sum test with continuity correction","greater",4054,4.18079761673751e-17,0.0909090909090909,1.07687211340209e-16
+"6","W","Auditory Neuropathy Spectrum Disorder","Wilcoxon rank sum test with continuity correction","greater",880.5,5.02544958407421e-05,0.294117647058824,7.24005448553064e-05
+"7","W","Autosomal dominant deafness","Wilcoxon rank sum test with continuity correction","greater",73588.5,3.66739329936185e-10,0.540697674418605,6.77670500969037e-10
+"8","W","Autosomal recessive congenital ichthyosis","Wilcoxon rank sum test with continuity correction","greater",5625,0.0760178912852522,0.803921568627451,0.0850200099900847
+"9","W","Bardet-Biedl Syndrome","Wilcoxon rank sum test with continuity correction","greater",3780,0.000111892580114549,0.216216216216216,0.000158514488495611
+"10","W","Brugada syndrome","Wilcoxon rank sum test with continuity correction","greater",123885,7.32724006106771e-41,0.504761904761905,3.27797581679345e-40
+"11","W","Cataracts","Wilcoxon rank sum test with continuity correction","greater",73028,1.99890323979053e-66,0.281879194630872,1.30697519524765e-65
+"12","W","Catecholaminergic Polymorphic Ventricular Tachycardia","Wilcoxon rank sum test with continuity correction","greater",3269.5,2.8896585037461e-16,0.133333333333333,7.22414625936525e-16
+"13","W","Cerebellar hypoplasia","Wilcoxon rank sum test with continuity correction","greater",8689.5,4.41125938579655e-09,0.166666666666667,7.49914095585414e-09
+"14","W","Charcot-Marie-Tooth disease","Wilcoxon rank sum test with continuity correction","greater",906150.5,9.24664388010611e-64,0.196078431372549,4.91227956130637e-63
+"15","W","Choanal atresia","Wilcoxon rank sum test with continuity correction","greater",264,0.0229042922255841,0.5,0.0266693813585568
+"16","W","Classical Beckwith-Wiedemann syndrome","Wilcoxon rank sum test with continuity correction","greater",725.5,0.0860678849575592,0.777777777777778,0.0950100028752277
+"17","W","Classical Ehlers-Danlos Syndrome","Wilcoxon rank sum test with continuity correction","greater",43809,1.55456238773267e-15,0.592307692307692,3.77536579877934e-15
+"18","W","Classical tuberous sclerosis","Wilcoxon rank sum test with continuity correction","greater",18628,1.53511310387376e-19,0.40506329113924,4.07764418216467e-19
+"19","W","Cone Dysfunction Syndrome","Wilcoxon rank sum test with continuity correction","greater",6285.5,2.75751035242956e-10,0.5625,5.20863066570028e-10
+"20","W","Congenital adrenal hypoplasia","Wilcoxon rank sum test with continuity correction","greater",1268.5,3.04844018129022e-12,0.210526315789474,6.31993696121143e-12
+"21","W","Congenital anaemias","Wilcoxon rank sum test with continuity correction","greater",13319,6.45636701893095e-13,0.151515151515152,1.40715691438239e-12
+"22","W","Congenital Anomaly of the Kidneys and Urinary Tract (CAKUT)","Wilcoxon rank sum test with continuity correction","greater",2286414,8.14448146391599e-249,0.365967365967366,6.92280924432859e-247
+"23","W","Congenital hypothyroidism","Wilcoxon rank sum test with continuity correction","greater",1720,0.945770356336477,0.75,0.951557259490599
+"24","W","Congenital muscular dystrophy","Wilcoxon rank sum test with continuity correction","greater",17106,0.0200089598049969,0.820224719101124,0.0236216886586769
+"25","W","Congenital myaesthenia","Wilcoxon rank sum test with continuity correction","greater",1520,2.52895905879657e-08,0.0952380952380952,4.05587773580582e-08
+"26","W","Congenital myopathy","Wilcoxon rank sum test with continuity correction","greater",299043,0.0258243133714119,0.574468085106383,0.0296630626563515
+"27","W","Corneal abnormalities","Wilcoxon rank sum test with continuity correction","greater",5697.5,1.55978170432805e-12,0.630434782608696,3.31453612169711e-12
+"28","W","Craniosynostosis syndromes","Wilcoxon rank sum test with continuity correction","greater",12405.5,0.806415690625833,0.641975308641975,0.825847394014407
+"29","W","Cystic kidney disease","Wilcoxon rank sum test with continuity correction","greater",3637003.5,9.64171922339877e-108,0.297816593886463,1.36591022331483e-106
+"30","W","Dilated Cardiomyopathy","Wilcoxon rank sum test with continuity correction","greater",573645.5,3.74687983373881e-162,0.171149144254279,1.06161595289266e-160
+"31","W","Early onset and familial Parkinson's Disease","Wilcoxon rank sum test with continuity correction","greater",545453.5,9.63473194645686e-115,0.176616915422886,1.63790443089767e-113
+"32","W","Early onset dystonia","Wilcoxon rank sum test with continuity correction","greater",295913.5,1.10368707446053e-71,0.175496688741722,7.81778344409542e-71
+"33","W","Early onset familial premature ovarian insufficiency","Wilcoxon rank sum test with continuity correction","greater",1504,2.03136935752103e-06,0.666666666666667,2.97700681705668e-06
+"34","W","Early onset or familial intestinal pseudo obstruction","Wilcoxon rank sum test with continuity correction","greater",2349,2.19080379592192e-13,0.04,4.90048217508851e-13
+"35","W","Ectodermal dysplasia without a known gene mutation","Wilcoxon rank sum test with continuity correction","greater",10801,0.710657564140874,0.426666666666667,0.755073661899679
+"36","W","Epidermolysis bullosa","Wilcoxon rank sum test with continuity correction","greater",3094,0.00610944417141105,0.810810810810811,0.00763680521426381
+"37","W","Epileptic encephalopathy","Wilcoxon rank sum test with continuity correction","greater",272158.5,1.4137168303923e-77,0.0212765957446809,1.20165930583345e-76
+"38","W","Familial cerebral small vessel disease","Wilcoxon rank sum test with continuity correction","greater",3338,0.00120019178170466,0.388888888888889,0.00161930637214121
+"39","W","Familial colon cancer","Wilcoxon rank sum test with continuity correction","greater",19070.5,4.84663310073388e-40,0.350649350649351,1.96173244553514e-39
+"40","W","Familial exudative vitreoretinopathy","Wilcoxon rank sum test with continuity correction","greater",5721,1.1720890922025e-19,0.333333333333333,3.21379267216814e-19
+"41","W","Familial Focal Epilepsies","Wilcoxon rank sum test with continuity correction","greater",13192,8.29226929224283e-15,0.441176470588235,1.957896916224e-14
+"42","W","Familial Genetic Generalised Epilepsies","Wilcoxon rank sum test with continuity correction","greater",96072,1.98185785810598e-64,0.365714285714286,1.12305278626006e-63
+"43","W","Familial Hypercholesterolaemia","Wilcoxon rank sum test with continuity correction","greater",464329,5.54153160165156e-39,0.476190476190476,2.1410463006381e-38
+"44","W","Familial pulmonary fibrosis","Wilcoxon rank sum test with continuity correction","greater",48036.5,2.14958546730838e-07,0.699300699300699,3.26276365573593e-07
+"45","W","Familial rhabdomyosarcoma or sarcoma","Wilcoxon rank sum test with continuity correction","greater",454.5,8.42838244288758e-11,0.0909090909090909,1.70574406582249e-10
+"46","W","Familial Thoracic Aortic Aneurysm Disease","Wilcoxon rank sum test with continuity correction","greater",1111503.5,1.22933351011964e-99,0.327361563517915,1.49276211943099e-98
+"47","W","Generalised pustular psoriasis","Wilcoxon rank sum test with continuity correction","greater",314,0.000252115723903415,0.3,0.000345642524706295
+"48","W","Genodermatoses with malignancies","Wilcoxon rank sum test with continuity correction","greater",6559,0.0144932138180643,0.547169811320755,0.0173510306272601
+"49","W","Hereditary haemorrhagic telangiectasia","Wilcoxon rank sum test with continuity correction","greater",74503,2.52593882273887e-40,0.100671140939597,1.07352399966402e-39
+"50","W","Hereditary spastic paraplegia","Wilcoxon rank sum test with continuity correction","greater",655747.5,7.79858583325498e-58,0.158562367864693,3.89929291662749e-57
+"51","W","Hyperinsulinism","Wilcoxon rank sum test with continuity correction","greater",1172,8.05948392255044e-09,0.0555555555555556,1.31741564118613e-08
+"52","W","Hypertrophic Cardiomyopathy","Wilcoxon rank sum test with continuity correction","greater",1678692,2.02839835216098e-203,0.197478991596639,8.62069299668417e-202
+"53","W","Idiopathic hypogonadotropic hypogonadism","Wilcoxon rank sum test with continuity correction","greater",4635,0.00137421688969381,0.465116279069767,0.00182513180662459
+"54","W","Infantile nystagmus","Wilcoxon rank sum test with continuity correction","greater",10017,1.19103631679235e-10,0.629032258064516,2.35437411458953e-10
+"55","W","Inherited bleeding and or platelet disorders","Wilcoxon rank sum test with continuity correction","greater",30643,1.55615449559272e-09,0.444444444444444,2.69945167602819e-09
+"56","W","Inherited macular dystrophy","Wilcoxon rank sum test with continuity correction","greater",444340,5.21885460987572e-47,0.75,2.4644591213302e-46
+"57","W","Kabuki syndrome","Wilcoxon rank sum test with continuity correction","greater",1283.5,0.00484245936764343,0.318181818181818,0.00614341860074167
+"58","W","Kyphoscoliotic Ehlers-Danlos syndrome","Wilcoxon rank sum test with continuity correction","greater",7305.5,3.66258676473257e-08,0.411764705882353,5.76518287041238e-08
+"59","W","Leber Congenital Amaurosis or Early-Onset Severe Retinal Dystrophy","Wilcoxon rank sum test with continuity correction","greater",15082.5,7.52811232880913e-07,0.486842105263158,1.1226132420154e-06
+"60","W","Left Ventricular Noncompaction Cardiomyopathy","Wilcoxon rank sum test with continuity correction","greater",11367.5,9.90390561174907e-27,0.442622950819672,3.11789621110619e-26
+"61","W","Limb girdle muscular dystrophy","Wilcoxon rank sum test with continuity correction","greater",126943,2.6453782306873e-37,0.0742574257425743,9.77639780906176e-37
+"62","W","Long QT syndrome","Wilcoxon rank sum test with continuity correction","greater",45550,1.10647252029003e-32,0.162393162393162,3.91875684269386e-32
+"63","W","Malformations of cortical development","Wilcoxon rank sum test with continuity correction","greater",25924.5,3.27251495512035e-32,0.193181818181818,1.11265508474092e-31
+"64","W","Meige disease","Wilcoxon rank sum test with continuity correction","greater",10016.5,1.01683104457816e-19,0.583333333333333,2.88102129297145e-19
+"65","W","Milroy disease","Wilcoxon rank sum test with continuity correction","greater",477,0.00856337449569418,0.714285714285714,0.0105490845236812
+"66","W","Moyamoya disease","Wilcoxon rank sum test with continuity correction","greater",1850,3.45718128852445e-14,0.0454545454545455,7.94217323039401e-14
+"67","W","Mucopolysaccharideosis, Gaucher, Fabry","Wilcoxon rank sum test with continuity correction","greater",382,0.00163237165423523,0.0909090909090909,0.00210229682742416
+"68","W","Multiple bowel polyps","Wilcoxon rank sum test with continuity correction","greater",72318,1.49498735721439e-64,0.027972027972028,9.07670895451594e-64
+"69","W","Multiple endocrine tumours","Wilcoxon rank sum test with continuity correction","greater",39370.5,5.31331282587348e-25,0.198198198198198,1.61296996499731e-24
+"70","W","Multiple Epiphyseal Dysplasia","Wilcoxon rank sum test with continuity correction","greater",1850.5,0.735000439322081,0.935483870967742,0.771296757313295
+"71","W","Noonan syndrome","Wilcoxon rank sum test with continuity correction","greater",5915,0.000163307308794674,0.479166666666667,0.00022755936471389
+"72","W","Osteogenesis imperfecta","Wilcoxon rank sum test with continuity correction","greater",393308.5,0.00991778119166323,0.677494199535963,0.0120430200184482
+"73","W","Primary ciliary dyskinesia","Wilcoxon rank sum test with continuity correction","greater",42669,8.32803799295511e-30,0.0884955752212389,2.72262780538917e-29
+"74","W","Primary immunodeficiency","Wilcoxon rank sum test with continuity correction","greater",1052319,1.96863001404814e-99,0.157534246575342,2.09166938992615e-98
+"75","W","Primary lymphoedema","Wilcoxon rank sum test with continuity correction","greater",16486,8.83787513461022e-10,0.474358974358974,1.56504038842056e-09
+"76","W","Primary Microcephaly - Microcephalic Dwarfism Spectrum","Wilcoxon rank sum test with continuity correction","greater",3098.5,0.226727835528235,0.5,0.243947671137974
+"77","W","Proteinuric renal disease","Wilcoxon rank sum test with continuity correction","greater",171236.5,7.13307273191305e-73,0.081447963800905,5.51191983829645e-72
+"78","W","Pulmonary arterial hypertension","Wilcoxon rank sum test with continuity correction","greater",659,1.23549683020605e-10,0,2.38675524017078e-10
+"79","W","Renal tubular acidosis","Wilcoxon rank sum test with continuity correction","greater",5489,5.90425601820396e-09,0.348837209302326,9.8404266970066e-09
+"80","W","Rod-cone dystrophy","Wilcoxon rank sum test with continuity correction","greater",2092289,4.22876423126276e-119,0.482758620689655,8.98612399143336e-118
+"81","W","Severe hypertriglyceridaemia","Wilcoxon rank sum test with continuity correction","greater",1513,4.74246220578528e-08,0.318181818181818,7.32925977257725e-08
+"82","W","Silver Russell syndrome","Wilcoxon rank sum test with continuity correction","greater",3565.5,0.0927688631313838,0.878048780487805,0.101094273925226
+"83","W","Sotos syndrome","Wilcoxon rank sum test with continuity correction","greater",1061.5,0.750087768748859,0.666666666666667,0.77753000419089
+"84","W","Stickler syndrome","Wilcoxon rank sum test with continuity correction","greater",2781.5,3.78301980404576e-10,0.366666666666667,6.84163156050829e-10
+"85","W","Weaver syndrome","Wilcoxon rank sum test with continuity correction","greater",493.5,0.951557259490599,0.666666666666667,0.951557259490599
